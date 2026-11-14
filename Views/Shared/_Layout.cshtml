@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>@ViewData["Title"] - AcxiomCRM</title>
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+ <div class="container-fluid">
+  <a class="navbar-brand fw-bold" href="/">AcxiomCRM</a>
+  @if (User.Identity.IsAuthenticated) {
+   <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nv"><span class="navbar-toggler-icon"></span></button>
+   <div class="collapse navbar-collapse" id="nv">
+    <ul class="navbar-nav me-auto">
+     <li class="nav-item"><a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+     <li class="nav-item"><a class="nav-link" asp-controller="Customers" asp-action="Index">Customers</a></li>
+     <li class="nav-item"><a class="nav-link" asp-controller="Leads" asp-action="Index">Leads</a></li>
+     <li class="nav-item"><a class="nav-link" asp-controller="Opportunities" asp-action="Index">Opportunities</a></li>
+     <li class="nav-item"><a class="nav-link" asp-controller="FollowUps" asp-action="Index">Follow-Ups</a></li>
+     <li class="nav-item"><a class="nav-link" asp-controller="Activities" asp-action="Index">Activities</a></li>
+     <li class="nav-item"><a class="nav-link" asp-controller="Reports" asp-action="Index">Reports</a></li>
+     @if (User.IsInRole("Admin")) {
+      <li class="nav-item"><a class="nav-link" asp-controller="Users" asp-action="Index">Users</a></li>
+      <li class="nav-item"><a class="nav-link" asp-controller="Roles" asp-action="Index">Roles &amp; Permissions</a></li>
+      <li class="nav-item"><a class="nav-link" asp-controller="Audit" asp-action="Index">Audit Log</a></li>
+     }
+    </ul>
+    <span class="navbar-text me-3 text-light small">@User.Identity.Name <span class="badge bg-secondary">@(User.IsInRole("Admin") ? "Admin" : User.IsInRole("Manager") ? "Manager" : "SalesExecutive")</span></span>
+    <a class="btn btn-sm btn-outline-light me-2" asp-controller="Account" asp-action="ChangePassword">Password</a>
+    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline"><button class="btn btn-sm btn-outline-warning">Logout</button></form>
+   </div>
+  }
+ </div>
+</nav>
+<main class="container py-4 flex-grow-1">
+ @if (TempData["ok"] != null) { <div class="alert alert-success alert-dismissible fade show">@TempData["ok"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+ @if (TempData["err"] != null) { <div class="alert alert-danger alert-dismissible fade show">@TempData["err"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+ @RenderBody()
+</main>
+<footer class="bg-white border-top py-2 text-center text-muted small">AcxiomCRM &copy; @DateTime.UtcNow.Year</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+ if ($.validator && $.validator.unobtrusive) {
+  $.validator.addMethod("notpastdate", function (value, element) {
+   if (!value) return true;
+   var parts = value.split("-");
+   if (parts.length !== 3) return true;
+   var inputDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+   var today = new Date();
+   today.setHours(0, 0, 0, 0);
+   return inputDate >= today;
+  });
+  $.validator.unobtrusive.adapters.addBool("notpastdate");
+
+  $.validator.addMethod("positiveamount", function (value, element) {
+   if (value === "" || value === null) return true;
+   var stageEl = document.querySelector("[name='Stage']");
+   if (stageEl && (stageEl.value === "Won" || stageEl.value === "Lost")) return parseFloat(value) >= 0;
+   return parseFloat(value) > 0;
+  });
+  $.validator.unobtrusive.adapters.addBool("positiveamount");
+ }
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

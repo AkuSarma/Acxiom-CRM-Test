@@ -1,0 +1,20 @@
+@model EntityBase
+@{
+ ViewData["Title"] = ViewBag.Title;
+ var userNames = ViewBag.UserNames as Dictionary<string, string> ?? new();
+ string ResolveUser(string id) => id != null && userNames.TryGetValue(id, out var n) ? n : "Unassigned";
+}
+<h2>@ViewBag.Title – Details</h2>
+<div class="card card-body shadow-sm mb-3">
+ @Html.DisplayForModel()
+ <hr />
+ <div class="row small text-muted">
+  <div class="col-md-4"><strong>Assigned To:</strong> @ResolveUser(Model.AssignedTo)</div>
+  <div class="col-md-4"><strong>Created By:</strong> @ResolveUser(Model.CreatedBy)</div>
+  <div class="col-md-4"><strong>Created Date (UTC):</strong> @Model.CreatedDate.ToString("u")</div>
+ </div>
+</div>
+<p>
+ <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+ <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+</p>

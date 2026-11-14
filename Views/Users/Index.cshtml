@@ -1,0 +1,65 @@
+@model List<UserRow>
+@{
+ ViewData["Title"] = "Users";
+ var managers = ViewBag.Managers as SelectList;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+ <h2>Users &amp; Team Assignment</h2>
+ <a class="btn btn-sm btn-outline-primary" asp-controller="Roles" asp-action="Index">Manage Roles &amp; Permissions</a>
+</div>
+<div class="table-responsive">
+ <table class="table table-striped bg-white shadow-sm align-middle">
+  <thead class="table-dark">
+   <tr><th>Name</th><th>Email</th><th>Role</th><th>Team &amp; Reporting Manager</th><th>Status</th><th>Lockout</th><th>Security</th></tr>
+  </thead>
+  <tbody>
+   @foreach (var r in Model) {
+    <tr>
+     <td>@r.User.FullName</td>
+     <td>@r.User.Email</td>
+     <td>
+      <form method="post" asp-action="SetRole" class="d-flex gap-1">
+       <input type="hidden" name="id" value="@r.User.Id" />
+       <select name="role" class="form-select form-select-sm">
+        @foreach (var ro in Roles.All) { <option selected="@(ro == r.Role)">@ro</option> }
+       </select>
+       <button class="btn btn-sm btn-outline-primary">Set</button>
+      </form>
+     </td>
+     <td>
+      <form method="post" asp-action="SetTeam" class="d-flex gap-1">
+       <input type="hidden" name="id" value="@r.User.Id" />
+       <input type="text" name="teamName" value="@r.User.TeamName" placeholder="Team" class="form-control form-control-sm" style="width:120px" />
+       <select name="managerId" class="form-select form-select-sm" style="width:140px">
+        <option value="">-- No Manager --</option>
+        @if (managers != null) {
+         foreach (SelectListItem m in managers) {
+          <option value="@m.Value" selected="@(m.Value == r.User.ManagerId)">@m.Text</option>
+         }
+        }
+       </select>
+       <button class="btn btn-sm btn-outline-secondary">Save</button>
+      </form>
+     </td>
+     <td>
+      <form method="post" asp-action="ToggleActive">
+       <input type="hidden" name="id" value="@r.User.Id" />
+       <button class="btn btn-sm @(r.User.IsActive ? "btn-outline-success" : "btn-outline-secondary")">@(r.User.IsActive ? "Active" : "Inactive")</button>
+      </form>
+     </td>
+     <td>
+      @if (r.Locked) {
+       <form method="post" asp-action="Unlock"><input type="hidden" name="id" value="@r.User.Id" /><button class="btn btn-sm btn-warning">Locked – unlock</button></form>
+      } else { <span class="text-muted small">OK</span> }
+     </td>
+     <td>
+      <form method="post" asp-action="ResetPassword" onsubmit="return confirm('Reset password?')">
+       <input type="hidden" name="id" value="@r.User.Id" />
+       <button class="btn btn-sm btn-outline-danger">Reset pwd</button>
+      </form>
+     </td>
+    </tr>
+   }
+  </tbody>
+ </table>
+</div>

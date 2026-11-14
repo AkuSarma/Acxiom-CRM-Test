@@ -1,0 +1,51 @@
+@model RolesPermissionsVm
+@{ ViewData["Title"] = "Roles & Permissions"; }
+<div class="d-flex justify-content-between align-items-center mb-3">
+ <h2>Roles &amp; Permissions Matrix</h2>
+ <a class="btn btn-sm btn-outline-secondary" asp-controller="Users" asp-action="Index">Back to Users</a>
+</div>
+
+<div class="row g-3 mb-4">
+ @foreach (var r in Model.Roles) {
+  <div class="col-md-4">
+   <div class="card shadow-sm h-100">
+    <div class="card-header fw-bold d-flex justify-content-between">
+     <span>@r.RoleName</span>
+     <span class="badge bg-primary">@r.UserCount user(s)</span>
+    </div>
+    <div class="card-body small">
+     @if (r.Users.Count == 0) { <span class="text-muted">No users assigned.</span> }
+     else { <ul class="mb-0 ps-3">@foreach (var u in r.Users) { <li>@u</li> }</ul> }
+    </div>
+   </div>
+  </div>
+ }
+</div>
+
+<div class="card shadow-sm">
+ <div class="card-header fw-bold">Module Access &amp; Permission Control</div>
+ <div class="table-responsive">
+  <table class="table table-sm table-striped align-middle mb-0">
+   <thead class="table-dark">
+    <tr><th>Role</th><th>Module</th><th class="text-center">View</th><th class="text-center">Create</th><th class="text-center">Edit</th><th class="text-center">Delete</th><th class="text-center">Assign</th><th></th></tr>
+   </thead>
+   <tbody>
+    @foreach (var p in Model.Permissions) {
+     <tr>
+      <td><span class="badge bg-secondary">@p.RoleName</span></td>
+      <td class="fw-semibold">@p.Module</td>
+      <form method="post" asp-action="UpdatePermission">
+       <input type="hidden" name="id" value="@p.Id" />
+       <td class="text-center"><input type="checkbox" name="canView" value="true" checked="@p.CanView" class="form-check-input" /></td>
+       <td class="text-center"><input type="checkbox" name="canCreate" value="true" checked="@p.CanCreate" class="form-check-input" /></td>
+       <td class="text-center"><input type="checkbox" name="canEdit" value="true" checked="@p.CanEdit" class="form-check-input" /></td>
+       <td class="text-center"><input type="checkbox" name="canDelete" value="true" checked="@p.CanDelete" class="form-check-input" /></td>
+       <td class="text-center"><input type="checkbox" name="canAssign" value="true" checked="@p.CanAssign" class="form-check-input" /></td>
+       <td><button class="btn btn-sm btn-outline-primary">Save</button></td>
+      </form>
+     </tr>
+    }
+   </tbody>
+  </table>
+ </div>
+</div>

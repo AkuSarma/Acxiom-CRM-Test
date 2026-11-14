@@ -1,0 +1,68 @@
+@model ReportVm
+@{
+ ViewData["Title"] = "Reports";
+ var names = new[] {
+  ("customers", "Customer"), ("leads", "Lead"), ("followups", "Follow-Up"),
+  ("opportunities", "Opportunity"), ("pipeline", "Pipeline"), ("conversion", "Conversion"),
+  ("useractivity", "User Activity"), ("audit", "Audit")
+ };
+ string SortUrl(string col) {
+  var nextDir = (Model.SortBy == col && Model.SortDir == "asc") ? "desc" : "asc";
+  return $"?name={Uri.EscapeDataString(Model.Name)}&from={Model.From?.ToString("yyyy-MM-dd")}&to={Model.To?.ToString("yyyy-MM-dd")}&sortBy={Uri.EscapeDataString(col)}&sortDir={nextDir}&page=1";
+ }
+ string PageUrl(int p) {
+  return $"?name={Uri.EscapeDataString(Model.Name)}&from={Model.From?.ToString("yyyy-MM-dd")}&to={Model.To?.ToString("yyyy-MM-dd")}&sortBy={Uri.EscapeDataString(Model.SortBy ?? "")}&sortDir={Model.SortDir}&page={p}";
+ }
+}
+<h2>Reports <span class="badge bg-secondary fs-6">@Model.TotalRows</span></h2>
+<form method="get" class="row g-2 mb-3">
+ <div class="col-auto">
+  <select name="name" class="form-select">
+   @foreach (var n in names) { <option value="@n.Item1" selected="@(n.Item1 == Model.Name)">@n.Item2 Report</option> }
+  </select>
+ </div>
+ <div class="col-auto"><input type="date" name="from" value="@Model.From?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+ <div class="col-auto"><input type="date" name="to" value="@Model.To?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+ <div class="col-auto">
+  <button class="btn btn-primary">Apply</button>
+  <a class="btn btn-outline-secondary"
+     asp-route-name="@Model.Name"
+     asp-route-from="@Model.From?.ToString("yyyy-MM-dd")"
+     asp-route-to="@Model.To?.ToString("yyyy-MM-dd")"
+     asp-route-sortBy="@Model.SortBy"
+     asp-route-sortDir="@Model.SortDir"
+     asp-route-csv="true">Export CSV</a>
+ </div>
+</form>
+
+@if (Model.Rows.Count == 0) {
+ <div class="alert alert-info">No data for the selected criteria.</div>
+} else {
+ <div class="table-responsive">
+  <table class="table table-striped table-hover bg-white shadow-sm">
+   <thead class="table-dark">
+    <tr>
+     @foreach (var k in Model.Rows[0].Keys) {
+      <th>
+       <a class="text-white text-decoration-none" href="@SortUrl(k)">
+        @k @(Model.SortBy == k ? (Model.SortDir == "desc" ? "▼" : "▲") : "")
+       </a>
+      </th>
+     }
+    </tr>
+   </thead>
+   <tbody>
+    @foreach (var r in Model.Rows) {
+     <tr>@foreach (var v in r.Values) { <td>@v</td> }</tr>
+    }
+   </tbody>
+  </table>
+ </div>
+ <nav class="d-flex justify-content-between align-items-center mt-2">
+  <span class="text-muted small">Page @Model.Page of @Model.Pages (@Model.TotalRows total rows)</span>
+  <div class="btn-group">
+   @if (Model.Page > 1) { <a class="btn btn-sm btn-outline-secondary" href="@PageUrl(Model.Page - 1)">Prev</a> }
+   @if (Model.Page < Model.Pages) { <a class="btn btn-sm btn-outline-secondary" href="@PageUrl(Model.Page + 1)">Next</a> }
+  </div>
+ </nav>
+}

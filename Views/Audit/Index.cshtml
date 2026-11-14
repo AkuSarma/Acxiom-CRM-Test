@@ -1,0 +1,33 @@
+@model List<AuditLog>
+@{
+ ViewData["Title"] = "Audit Log";
+ var userNames = ViewBag.UserNames as Dictionary<string, string> ?? new();
+ string ResolveUser(string id) => id != null && userNames.TryGetValue(id, out var n) ? $"{n} ({id[..Math.Min(6, id.Length)]})" : (id ?? "Anonymous");
+}
+<h2>Audit Log</h2>
+<form method="get" class="row g-2 mb-3">
+ <div class="col-auto"><input name="user" placeholder="User ID" class="form-control" /></div>
+ <div class="col-auto"><input name="entity" placeholder="Entity" class="form-control" /></div>
+ <div class="col-auto"><input name="action" placeholder="Action" class="form-control" /></div>
+ <div class="col-auto"><input type="date" name="from" class="form-control" /></div>
+ <div class="col-auto"><input type="date" name="to" class="form-control" /></div>
+ <div class="col-auto"><button class="btn btn-primary">Filter</button></div>
+</form>
+<div class="table-responsive">
+ <table class="table table-sm table-striped bg-white small shadow-sm">
+  <thead class="table-dark"><tr><th>Time (UTC)</th><th>User</th><th>Action</th><th>Entity</th><th>Record</th><th>IP</th><th>New value</th></tr></thead>
+  <tbody>
+   @foreach (var a in Model) {
+    <tr>
+     <td>@a.CreatedDate.ToString("u")</td>
+     <td>@ResolveUser(a.UserId)</td>
+     <td><span class="badge bg-secondary">@a.Action</span></td>
+     <td>@a.EntityName</td>
+     <td>@a.RecordId</td>
+     <td>@a.IpAddress</td>
+     <td>@((a.NewValue ?? "").Length > 80 ? a.NewValue[..80] + "..." : a.NewValue)</td>
+    </tr>
+   }
+  </tbody>
+ </table>
+</div>

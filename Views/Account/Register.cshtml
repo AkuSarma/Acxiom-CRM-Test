@@ -1,0 +1,17 @@
+@model RegisterVm
+@{ ViewData["Title"] = "Register"; }
+<div class="col-md-4 mx-auto bg-white p-4 rounded shadow-sm">
+ <h2>Register</h2>
+ <form method="post">
+  <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+  @foreach (var f in new[] { "FullName", "Email", "Password", "ConfirmPassword" }) {
+   <div class="mb-3">
+    @Html.Label(f, null, new { @class = "form-label" })
+    @Html.Editor(f, new { htmlAttributes = new { @class = "form-control" } })
+    @Html.ValidationMessage(f, "", new { @class = "text-danger" })
+   </div>
+  }
+  <p class="small text-muted">Password: 8+ chars with upper, lower, digit and special character.</p>
+  <button class="btn btn-primary">Register</button> <a class="ms-2" asp-action="Login">Login</a>
+ </form>
+</div>
